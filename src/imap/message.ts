@@ -21,6 +21,11 @@ function formatHeaderValue(value: unknown): string {
   return String(value);
 }
 
+function sanitizeFilename(name: string): string {
+  const base = name.replace(/^.*[/\\]/, "");
+  return base.replace(/^\.+/, "").trim() || "attachment";
+}
+
 function collectAttachmentParts(
   node: MessageStructureObject | undefined,
   out: AttachmentInfo[] = []
@@ -32,7 +37,7 @@ function collectAttachmentParts(
   if (disposition === "attachment" && node.part) {
     out.push({
       partId: node.part,
-      filename: filename ?? `attachment-${node.part}`,
+      filename: filename ? sanitizeFilename(filename) : `attachment-${node.part}`,
       contentType: node.type,
       size: node.size ?? 0,
     });
@@ -104,7 +109,7 @@ export async function fetchAttachment(
   const buffer = Buffer.concat(chunks);
 
   return {
-    filename: meta.filename ?? `attachment-${partId}`,
+    filename: meta.filename ? sanitizeFilename(meta.filename) : `attachment-${partId}`,
     contentType: meta.contentType ?? "application/octet-stream",
     contentBase64: buffer.toString("base64"),
   };

@@ -33,6 +33,11 @@ export function loadConfig(): Config {
   }
 
   const env = parsed.data;
+  if (!env.IMAP_TLS) {
+    console.error(
+      "WARNING: IMAP_TLS=false - connecting without TLS. Credentials and mail content will be sent in plaintext."
+    );
+  }
   return {
     email: env.YAHOO_EMAIL,
     appPassword: env.YAHOO_APP_PASSWORD,
