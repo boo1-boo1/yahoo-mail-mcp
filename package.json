@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "author": "boo1-boo1 <38583719+boo1-boo1@users.noreply.github.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boo1-boo1/yahoo-mail-mcp.git"
+  },
+  "bin": {
+    "yahoo-mail-mcp": "src/index.ts"
+  },
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun --watch run src/index.ts",

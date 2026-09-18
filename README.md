@@ -45,6 +45,44 @@ Or add to `.mcp.json`:
 }
 ```
 
+## Registering with Claude Desktop
+
+Add to `claude_desktop_config.json` (Settings -> Developer -> Edit Config):
+
+```json
+{
+  "mcpServers": {
+    "yahoo-mail": {
+      "command": "bunx",
+      "args": ["github:boo1-boo1/yahoo-mail-mcp"],
+      "env": {
+        "YAHOO_EMAIL": "you@yahoo.com",
+        "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+Or, running from a local clone instead of GitHub:
+
+```json
+{
+  "mcpServers": {
+    "yahoo-mail": {
+      "command": "bun",
+      "args": ["run", "/home/USER/Developer/yahoo-mail-mcp/src/index.ts"],
+      "env": {
+        "YAHOO_EMAIL": "you@yahoo.com",
+        "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop after editing the config.
+
 ## Tools
 
 - `list_folders` - list all mailboxes.
