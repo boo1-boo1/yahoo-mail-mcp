@@ -1,5 +1,6 @@
 import type { ImapFlow, MessageStructureObject, SearchObject } from "imapflow";
 import type { MessageSummary } from "../types.ts";
+import { formatAddr } from "./format.ts";
 
 export interface SearchCriteria {
   from?: string;
@@ -132,9 +133,6 @@ export function toMessageSummary(
   },
   snippet: string
 ): MessageSummary {
-  const formatAddr = (a?: { name?: string; address?: string }) =>
-    a?.name ? `${a.name} <${a.address ?? ""}>` : a?.address ?? "";
-
   return {
     uid: msg.uid,
     folder,

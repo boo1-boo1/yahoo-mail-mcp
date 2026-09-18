@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ImapClient } from "../imap/client.ts";
 import { buildSearchObject, fetchSnippet, toMessageSummary } from "../imap/search.ts";
+import { jsonResult } from "./respond.ts";
 
 const inputShape = {
   folder: z.string().default("INBOX"),
@@ -51,24 +52,18 @@ export function registerSearchEmails(imap: ImapClient) {
           bodyStructure: true,
         }, { uid: true });
 
-        const messages = [];
-        for (const msg of fetched) {
-          const snippet = await fetchSnippet(client, msg.uid, msg.bodyStructure);
-          messages.push(toMessageSummary(args.folder, msg, snippet));
-        }
+        const messages = await Promise.all(
+          fetched.map(async (msg) => {
+            const snippet = await fetchSnippet(client, msg.uid, msg.bodyStructure);
+            return toMessageSummary(args.folder, msg, snippet);
+          })
+        );
         messages.sort((a, b) => (a.date < b.date ? 1 : -1));
 
         return { total: uids.length, messages };
       });
 
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: JSON.stringify({ folder: args.folder, ...result }, null, 2),
-          },
-        ],
-      };
+      return jsonResult({ folder: args.folder, ...result });
     },
   };
 }

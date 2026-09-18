@@ -1,6 +1,7 @@
 import type { ImapFlow, MessageStructureObject } from "imapflow";
 import { simpleParser } from "mailparser";
 import type { AttachmentInfo, MessageDetail } from "../types.ts";
+import { formatAddr } from "./format.ts";
 
 function formatHeaderValue(value: unknown): string {
   if (typeof value === "string") return value;
@@ -71,9 +72,6 @@ export async function fetchMessageDetail(
 
   const attachments = collectAttachmentParts(fetched.bodyStructure);
 
-  const formatAddr = (a?: { name?: string; address?: string }) =>
-    a?.name ? `${a.name} <${a.address ?? ""}>` : a?.address ?? "";
-
   return {
     uid,
     folder,
@@ -113,4 +111,20 @@ export async function fetchAttachment(
     contentType: meta.contentType ?? "application/octet-stream",
     contentBase64: buffer.toString("base64"),
   };
+}
+
+/** Adds or removes a flag on a message, returning its resulting flag set. */
+export async function setFlag(
+  client: ImapFlow,
+  uid: number,
+  flag: string,
+  on: boolean
+): Promise<string[]> {
+  if (on) {
+    await client.messageFlagsAdd(String(uid), [flag], { uid: true });
+  } else {
+    await client.messageFlagsRemove(String(uid), [flag], { uid: true });
+  }
+  const msg = await client.fetchOne(String(uid), { flags: true }, { uid: true });
+  return Array.from((msg && msg.flags) || []);
 }

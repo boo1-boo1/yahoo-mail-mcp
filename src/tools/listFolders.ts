@@ -1,5 +1,6 @@
 import type { ImapClient } from "../imap/client.ts";
 import { listFolders } from "../imap/mailboxes.ts";
+import { jsonResult } from "./respond.ts";
 
 export function registerListFolders(imap: ImapClient) {
   return {
@@ -10,11 +11,7 @@ export function registerListFolders(imap: ImapClient) {
     },
     handler: async () => {
       const folders = await imap.withClient((client) => listFolders(client));
-      return {
-        content: [
-          { type: "text" as const, text: JSON.stringify({ folders }, null, 2) },
-        ],
-      };
+      return jsonResult({ folders });
     },
   };
 }

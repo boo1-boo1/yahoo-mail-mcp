@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ImapClient } from "../imap/client.ts";
 import { fetchAttachment } from "../imap/message.ts";
+import { jsonResult } from "./respond.ts";
 
 const inputShape = {
   folder: z.string(),
@@ -20,11 +21,7 @@ export function registerGetAttachment(imap: ImapClient) {
       const attachment = await imap.withMailbox(args.folder, (client) =>
         fetchAttachment(client, args.uid, args.partId)
       );
-      return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(attachment, null, 2) },
-        ],
-      };
+      return jsonResult(attachment);
     },
   };
 }

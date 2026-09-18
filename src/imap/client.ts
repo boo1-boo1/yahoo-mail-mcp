@@ -1,9 +1,11 @@
 import { ImapFlow, type MailboxLockObject } from "imapflow";
 import type { Config } from "../config.ts";
+import { resolveTrashPath } from "./mailboxes.ts";
 
 export class ImapClient {
   private client: ImapFlow;
   private connecting: Promise<void> | null = null;
+  private trashPath: string | null = null;
 
   constructor(config: Config) {
     this.client = new ImapFlow({
@@ -62,6 +64,14 @@ export class ImapClient {
         lock.release();
       }
     });
+  }
+
+  /** Trash mailbox path, resolved once via LIST and cached for the process lifetime. */
+  async getTrashPath(client: ImapFlow): Promise<string> {
+    if (!this.trashPath) {
+      this.trashPath = await resolveTrashPath(client);
+    }
+    return this.trashPath;
   }
 
   async shutdown(): Promise<void> {

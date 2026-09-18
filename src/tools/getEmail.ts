@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ImapClient } from "../imap/client.ts";
 import { fetchMessageDetail } from "../imap/message.ts";
+import { jsonResult } from "./respond.ts";
 
 const inputShape = {
   folder: z.string(),
@@ -19,11 +20,7 @@ export function registerGetEmail(imap: ImapClient) {
       const detail = await imap.withMailbox(args.folder, (client) =>
         fetchMessageDetail(client, args.folder, args.uid)
       );
-      return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(detail, null, 2) },
-        ],
-      };
+      return jsonResult(detail);
     },
   };
 }
