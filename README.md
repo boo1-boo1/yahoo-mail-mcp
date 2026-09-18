@@ -1,4 +1,8 @@
-# yahoo-mail-mcp
+# Yahoo Mail MCP Server
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Bun](https://img.shields.io/badge/runtime-bun-f472b6.svg)](https://bun.sh)
+[![MCP](https://img.shields.io/badge/protocol-MCP-6b5bff.svg)](https://modelcontextprotocol.io)
 
 MCP server exposing Yahoo Mail (via IMAP) as tools for Claude: list folders,
 search/read emails, manage flags and folders.
