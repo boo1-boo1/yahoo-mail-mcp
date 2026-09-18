@@ -104,21 +104,3 @@ Restart Claude Desktop after editing the config.
 
 All operations identify messages by IMAP UID (stable across sessions), not
 sequence number.
-
-## Manual verification checklist
-
-No live Yahoo account is available in the dev sandbox, so verify by hand
-against your real account after setup:
-
-1. `list_folders` - confirm your real folder names come back (Yahoo typically
-   uses `Inbox`, `Draft`, `Sent`, `Trash`, `Bulk Mail`, plus any custom ones).
-2. `search_emails` on `INBOX` with `unreadOnly: true` - confirm results match
-   what the Yahoo Mail web UI shows as unread.
-3. `get_email` on one returned UID - confirm subject/body/attachments match
-   the web UI.
-4. `mark_read` then `flag_email` on that message - confirm state changes
-   reflect in the web UI.
-5. `move_email` to another folder, then `delete_email` (soft) on a disposable
-   test message - confirm it lands in Trash.
-6. Leave the server idle for 30+ minutes, then issue another tool call -
-   confirm it reconnects rather than hanging or erroring.
