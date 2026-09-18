@@ -44,39 +44,6 @@ function findTextPart(
   return undefined;
 }
 
-function decodeQuotedPrintable(input: string): Buffer {
-  const bytes: number[] = [];
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i];
-    if (ch === "=" && i + 2 < input.length) {
-      const hex = input.slice(i + 1, i + 3);
-      if (/^[0-9A-Fa-f]{2}$/.test(hex)) {
-        bytes.push(parseInt(hex, 16));
-        i += 2;
-        continue;
-      }
-      if (hex === "\r\n" || input[i + 1] === "\n") {
-        // soft line break - drop it
-        i += hex[0] === "\r" ? 2 : 1;
-        continue;
-      }
-    }
-    bytes.push(ch.charCodeAt(0));
-  }
-  return Buffer.from(bytes);
-}
-
-function decodeBodyPart(raw: Buffer, encoding: string | undefined): string {
-  const enc = encoding?.toLowerCase();
-  if (enc === "base64") {
-    return Buffer.from(raw.toString("ascii").replace(/[\r\n]/g, ""), "base64").toString("utf8");
-  }
-  if (enc === "quoted-printable") {
-    return decodeQuotedPrintable(raw.toString("ascii")).toString("utf8");
-  }
-  return raw.toString("utf8");
-}
-
 function stripHtml(html: string): string {
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -98,17 +65,18 @@ export async function fetchSnippet(
     isHtml = true;
   }
   if (!node || !node.part) return "";
-  const partId = node.part;
 
-  const message = await client.fetchOne(
-    String(uid),
-    { bodyParts: [{ key: partId, maxLength: 800 }] },
-    { uid: true }
-  );
-  if (!message || !message.bodyParts) return "";
-  const buf = message.bodyParts.get(partId);
-  if (!buf) return "";
-  const raw = decodeBodyPart(buf, node.encoding);
+  const { content } = await client.download(String(uid), node.part, {
+    uid: true,
+    maxBytes: 2000,
+  });
+  if (!content) return "";
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of content) {
+    chunks.push(chunk as Buffer);
+  }
+  const raw = Buffer.concat(chunks).toString("utf8");
   const text = isHtml ? stripHtml(raw) : raw;
   return text.slice(0, 200).trim();
 }

@@ -37,13 +37,22 @@ export class ImapClient {
     await this.connecting;
   }
 
-  /** Runs fn with a connected client, retrying once after a reconnect on connection-class failures. */
-  async withClient<T>(fn: (client: ImapFlow) => Promise<T>): Promise<T> {
+  /**
+   * Runs fn with a connected client, retrying once after a reconnect on
+   * connection-class failures. Pass `{ retry: false }` for non-idempotent
+   * operations (move/delete) where blindly re-running fn after a lost ack
+   * could act on a message that already moved/was already deleted.
+   */
+  async withClient<T>(
+    fn: (client: ImapFlow) => Promise<T>,
+    options: { retry?: boolean } = {}
+  ): Promise<T> {
+    const retry = options.retry ?? true;
     await this.ensureConnected();
     try {
       return await fn(this.client);
     } catch (err) {
-      if (isConnectionError(err) || !this.client.usable) {
+      if (retry && (isConnectionError(err) || !this.client.usable)) {
         await this.ensureConnected();
         return await fn(this.client);
       }
@@ -54,7 +63,8 @@ export class ImapClient {
   /** Opens a mailbox lock, runs fn, and always releases the lock. */
   async withMailbox<T>(
     path: string,
-    fn: (client: ImapFlow, lock: MailboxLockObject) => Promise<T>
+    fn: (client: ImapFlow, lock: MailboxLockObject) => Promise<T>,
+    options: { retry?: boolean } = {}
   ): Promise<T> {
     return this.withClient(async (client) => {
       const lock = await client.getMailboxLock(path);
@@ -63,7 +73,7 @@ export class ImapClient {
       } finally {
         lock.release();
       }
-    });
+    }, options);
   }
 
   /** Trash mailbox path, resolved once via LIST and cached for the process lifetime. */

@@ -22,6 +22,8 @@ function formatHeaderValue(value: unknown): string {
   return String(value);
 }
 
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+
 function sanitizeFilename(name: string): string {
   const base = name.replace(/^.*[/\\]/, "");
   return base.replace(/^\.+/, "").trim() || "attachment";
@@ -98,11 +100,23 @@ export async function fetchAttachment(
 ): Promise<{ filename: string; contentType: string; contentBase64: string }> {
   const { meta, content } = await client.download(String(uid), partId, {
     uid: true,
+    maxBytes: MAX_ATTACHMENT_BYTES,
   });
 
+  if (meta.expectedSize && meta.expectedSize > MAX_ATTACHMENT_BYTES) {
+    throw new Error(
+      `Attachment too large: ${meta.expectedSize} bytes (max ${MAX_ATTACHMENT_BYTES})`
+    );
+  }
+
   const chunks: Buffer[] = [];
+  let total = 0;
   for await (const chunk of content) {
     chunks.push(chunk as Buffer);
+    total += (chunk as Buffer).length;
+  }
+  if (total >= MAX_ATTACHMENT_BYTES) {
+    throw new Error(`Attachment too large: exceeds ${MAX_ATTACHMENT_BYTES} byte limit`);
   }
   const buffer = Buffer.concat(chunks);
 

@@ -21,20 +21,32 @@ export function registerDeleteEmail(imap: ImapClient) {
       inputSchema: inputShape,
     },
     handler: async (args: { folder: string; uid: number; permanent: boolean }) => {
-      await imap.withMailbox(args.folder, async (client) => {
-        if (args.permanent) {
-          await client.messageFlagsAdd(String(args.uid), ["\\Deleted"], { uid: true });
-          await client.messageDelete(String(args.uid), { uid: true });
-        } else {
-          const trashPath = await imap.getTrashPath(client);
-          const result = await client.messageMove(String(args.uid), trashPath, {
-            uid: true,
-          });
-          if (!result) {
-            throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);
+      await imap.withMailbox(
+        args.folder,
+        async (client) => {
+          if (args.permanent) {
+            if (!client.capabilities.has("UIDPLUS")) {
+              console.error(
+                "WARNING: server lacks UIDPLUS - permanent delete expunges ALL " +
+                  "messages already flagged \\Deleted in this mailbox, not just this one."
+              );
+            }
+            const result = await client.messageDelete(String(args.uid), { uid: true });
+            if (!result) {
+              throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);
+            }
+          } else {
+            const trashPath = await imap.getTrashPath(client);
+            const result = await client.messageMove(String(args.uid), trashPath, {
+              uid: true,
+            });
+            if (!result) {
+              throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);
+            }
           }
-        }
-      });
+        },
+        { retry: false }
+      );
       return jsonResult({ success: true });
     },
   };

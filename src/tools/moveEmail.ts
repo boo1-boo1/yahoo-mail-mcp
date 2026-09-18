@@ -17,8 +17,10 @@ export function registerMoveEmail(imap: ImapClient) {
       inputSchema: inputShape,
     },
     handler: async (args: { folder: string; uid: number; destinationFolder: string }) => {
-      const result = await imap.withMailbox(args.folder, (client) =>
-        client.messageMove(String(args.uid), args.destinationFolder, { uid: true })
+      const result = await imap.withMailbox(
+        args.folder,
+        (client) => client.messageMove(String(args.uid), args.destinationFolder, { uid: true }),
+        { retry: false }
       );
       if (!result) {
         throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);

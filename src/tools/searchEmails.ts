@@ -42,23 +42,25 @@ export function registerSearchEmails(imap: ImapClient) {
           return { total: 0, messages: [] };
         }
 
-        const sorted = [...uids].sort((a, b) => b - a);
-        const page = sorted.slice(0, args.limit);
-
-        const fetched = await client.fetchAll(page, {
+        const fetched = await client.fetchAll(uids, {
           uid: true,
           envelope: true,
           flags: true,
           bodyStructure: true,
         }, { uid: true });
 
+        fetched.sort(
+          (a, b) => (b.envelope?.date ? new Date(b.envelope.date).getTime() : 0) -
+            (a.envelope?.date ? new Date(a.envelope.date).getTime() : 0)
+        );
+        const page = fetched.slice(0, args.limit);
+
         const messages = await Promise.all(
-          fetched.map(async (msg) => {
+          page.map(async (msg) => {
             const snippet = await fetchSnippet(client, msg.uid, msg.bodyStructure);
             return toMessageSummary(args.folder, msg, snippet);
           })
         );
-        messages.sort((a, b) => (a.date < b.date ? 1 : -1));
 
         return { total: uids.length, messages };
       });
