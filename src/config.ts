@@ -1,0 +1,43 @@
+import { z } from "zod";
+
+const envSchema = z.object({
+  YAHOO_EMAIL: z.string().email(),
+  YAHOO_APP_PASSWORD: z.string().min(1),
+  IMAP_HOST: z.string().default("imap.mail.yahoo.com"),
+  IMAP_PORT: z.coerce.number().int().default(993),
+  IMAP_TLS: z
+    .string()
+    .default("true")
+    .transform((v) => v !== "false"),
+});
+
+export type Config = {
+  email: string;
+  appPassword: string;
+  host: string;
+  port: number;
+  tls: boolean;
+};
+
+export function loadConfig(): Config {
+  const parsed = envSchema.safeParse(process.env);
+  if (!parsed.success) {
+    console.error("Invalid environment configuration:");
+    for (const issue of parsed.error.issues) {
+      console.error(`  ${issue.path.join(".")}: ${issue.message}`);
+    }
+    console.error(
+      "Set YAHOO_EMAIL and YAHOO_APP_PASSWORD (generate an App Password at Yahoo Account Security)."
+    );
+    process.exit(1);
+  }
+
+  const env = parsed.data;
+  return {
+    email: env.YAHOO_EMAIL,
+    appPassword: env.YAHOO_APP_PASSWORD,
+    host: env.IMAP_HOST,
+    port: env.IMAP_PORT,
+    tls: env.IMAP_TLS,
+  };
+}
