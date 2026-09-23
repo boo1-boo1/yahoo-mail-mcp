@@ -30,7 +30,7 @@ search/read emails, manage flags and folders.
 ## Registering with Claude Code
 
 ```
-claude mcp add yahoo-mail node /home/USER/Developer/yahoo-mail-mcp/dist/index.js
+claude mcp add yahoo-mail node /path/to/yahoo-mail-mcp/dist/index.js
 ```
 
 Or add to `.mcp.json`:
@@ -40,7 +40,7 @@ Or add to `.mcp.json`:
   "mcpServers": {
     "yahoo-mail": {
       "command": "node",
-      "args": ["/home/USER/Developer/yahoo-mail-mcp/dist/index.js"],
+      "args": ["/path/to/yahoo-mail-mcp/dist/index.js"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
         "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
@@ -76,7 +76,7 @@ Or, running from a local clone instead of GitHub:
   "mcpServers": {
     "yahoo-mail": {
       "command": "node",
-      "args": ["/home/USER/Developer/yahoo-mail-mcp/dist/index.js"],
+      "args": ["/path/to/yahoo-mail-mcp/dist/index.js"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
         "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
