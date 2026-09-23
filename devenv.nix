@@ -29,6 +29,7 @@
   };
 
   scripts = {
+    build.exec = "pnpm build";
     lint.exec = "pnpm lint";
     typecheck.exec = "pnpm typecheck";
     test.exec = "pnpm test";

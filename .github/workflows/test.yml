@@ -26,5 +26,8 @@ jobs:
       - name: Typecheck
         run: devenv shell typecheck
 
+      - name: Build
+        run: devenv shell build
+
       - name: Unit tests
         run: devenv shell test
