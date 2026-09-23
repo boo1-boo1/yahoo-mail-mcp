@@ -15,8 +15,8 @@
     "dist"
   ],
   "scripts": {
-    "prepare": "tsc",
-    "build": "tsc",
+    "prepare": "vite build",
+    "build": "vite build",
     "start": "node --env-file-if-exists=.env dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
@@ -39,6 +39,9 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.8",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.70.1"
-  }
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.0"
+  },
+  "build": "vite build",
+  "prepare": "vite build"
 }
