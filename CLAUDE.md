@@ -4,19 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- `bun install` - install deps.
-- `bun run src/index.ts` or `bun start` - run server directly (stdio transport, connects to Yahoo IMAP on start).
-- `bun --watch run src/index.ts` or `bun dev` - run with reload on change.
-- `bun run typecheck` - `tsc --noEmit`, no build step (Bun runs `.ts` directly).
-- `bun test` - run all tests. Single file: `bun test src/imap/search.test.ts`. Single test: `bun test -t "test name"`.
-- Env managed via `devenv`/`direnv` (`devenv.nix`, `.envrc`); `bun` provided through devenv, not global install.
+- `pnpm install` - install deps.
+- `pnpm build` - compile `src/` to `dist/` with `tsc` (required before running).
+- `pnpm start` - run the built server (`node dist/index.js`, stdio transport, connects to Yahoo IMAP on start).
+- `pnpm typecheck` - `tsc --noEmit`.
+- Env managed via `devenv`/`direnv` (`devenv.nix`, `.envrc`); `pnpm`/`node` provided through devenv, not global install.
 - Runtime env vars: `YAHOO_EMAIL`, `YAHOO_APP_PASSWORD` required; `IMAP_HOST`, `IMAP_PORT`, `IMAP_TLS` optional (see `src/config.ts` for defaults). Local dev copies `.env.example` to `.env`.
 
 ## Architecture
 
 MCP server (stdio transport) exposing Yahoo Mail as tools, built on `@modelcontextprotocol/sdk`, `imapflow` for IMAP, `mailparser` for MIME parsing.
 
-- `src/index.ts` - entry point (has `#!/usr/bin/env bun` shebang, also the `bin` target for `bunx github:boo1-boo1/yahoo-mail-mcp`). Loads config, constructs one `ImapClient`, registers tools, connects stdio transport.
+- `src/index.ts` - entry point (has `#!/usr/bin/env node` shebang; compiled to `dist/index.js`, which is the `bin` target for `npx github:boo1-boo1/yahoo-mail-mcp` - the `prepare` script builds it on git-dep install). Loads config, constructs one `ImapClient`, registers tools, connects stdio transport.
 - `src/config.ts` - validates `process.env` with a zod schema into a typed `Config`; exits process on invalid env.
 - `src/imap/client.ts` - `ImapClient` wraps a single long-lived `ImapFlow` connection.
   - `withClient(fn, { retry })` - ensures connected, runs `fn`, retries once after reconnect on connection-class errors (`ECONNRESET`/`ETIMEDOUT`/`EPIPE`/etc). Default `retry: true`.

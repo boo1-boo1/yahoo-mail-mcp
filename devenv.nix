@@ -11,7 +11,7 @@
     enable = true;
     lsp.enable = true;
     lsp.package = pkgs.vtsls;
-    bun.enable = true;
-    bun.install.enable = true;
+    pnpm.enable = true;
+    pnpm.install.enable = true;
   };
 }

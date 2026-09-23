@@ -1,7 +1,7 @@
 # Yahoo Mail MCP Server
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Bun](https://img.shields.io/badge/runtime-bun-f472b6.svg)](https://bun.sh)
+[![Runtime: Node](https://img.shields.io/badge/runtime-node-339933.svg)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/protocol-MCP-6b5bff.svg)](https://modelcontextprotocol.io)
 
 MCP server exposing Yahoo Mail (via IMAP) as tools for Claude: list folders,
@@ -15,13 +15,14 @@ search/read emails, manage flags and folders.
    ```
    cp .env.example .env
    ```
-3. Install dependencies (managed by devenv/bun):
+3. Install dependencies (managed by devenv/pnpm):
    ```
-   bun install
+   pnpm install
    ```
-4. Run the server directly to confirm it authenticates without error:
+4. Build and run the server directly to confirm it authenticates without error:
    ```
-   bun run src/index.ts
+   pnpm build
+   pnpm start
    ```
    Ctrl-C to stop. If you see an `AuthenticationFailure`-related error, double
    check `YAHOO_APP_PASSWORD` is an app password, not your account password.
@@ -29,7 +30,7 @@ search/read emails, manage flags and folders.
 ## Registering with Claude Code
 
 ```
-claude mcp add yahoo-mail bun run /home/USER/Developer/yahoo-mail-mcp/src/index.ts
+claude mcp add yahoo-mail node /home/USER/Developer/yahoo-mail-mcp/dist/index.js
 ```
 
 Or add to `.mcp.json`:
@@ -38,8 +39,8 @@ Or add to `.mcp.json`:
 {
   "mcpServers": {
     "yahoo-mail": {
-      "command": "bun",
-      "args": ["run", "/home/USER/Developer/yahoo-mail-mcp/src/index.ts"],
+      "command": "node",
+      "args": ["/home/USER/Developer/yahoo-mail-mcp/dist/index.js"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
         "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
@@ -57,7 +58,7 @@ Add to `claude_desktop_config.json` (Settings -> Developer -> Edit Config):
 {
   "mcpServers": {
     "yahoo-mail": {
-      "command": "bunx",
+      "command": "npx",
       "args": ["github:boo1-boo1/yahoo-mail-mcp"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
@@ -74,8 +75,8 @@ Or, running from a local clone instead of GitHub:
 {
   "mcpServers": {
     "yahoo-mail": {
-      "command": "bun",
-      "args": ["run", "/home/USER/Developer/yahoo-mail-mcp/src/index.ts"],
+      "command": "node",
+      "args": ["/home/USER/Developer/yahoo-mail-mcp/dist/index.js"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
         "YAHOO_APP_PASSWORD": "xxxxxxxxxxxxxxxx"
