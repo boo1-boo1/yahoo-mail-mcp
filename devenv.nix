@@ -28,6 +28,12 @@
     };
   };
 
+  scripts = {
+    lint.exec = "pnpm lint";
+    typecheck.exec = "pnpm typecheck";
+    test.exec = "pnpm test";
+  };
+
   git-hooks = {
     enable = true;
     hooks = {
