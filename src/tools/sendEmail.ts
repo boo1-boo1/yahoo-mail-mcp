@@ -19,7 +19,9 @@ const inputShape = {
   to: z
     .string()
     .min(1)
-    .describe('Recipients, comma-separated. Example: "a@example.com, b@example.com"'),
+    .describe(
+      'Recipients, comma-separated. Example: "a@example.com, b@example.com"',
+    ),
   cc: z.string().optional().describe("Cc recipients, comma-separated"),
   bcc: z.string().optional().describe("Bcc recipients, comma-separated"),
   subject: z.string().default(""),
@@ -28,8 +30,11 @@ const inputShape = {
     .array(
       z.object({
         filename: z.string().min(1),
-        contentBase64: z.string().min(1).describe("Base64-encoded file content"),
-      })
+        contentBase64: z
+          .string()
+          .min(1)
+          .describe("Base64-encoded file content"),
+      }),
     )
     .max(10)
     .optional(),
@@ -60,7 +65,10 @@ export function registerSendEmail(server: McpServer, smtp: SmtpClient) {
         filename: a.filename,
         content: Buffer.from(a.contentBase64, "base64"),
       }));
-      const totalBytes = attachments.reduce((sum, a) => sum + a.content.length, 0);
+      const totalBytes = attachments.reduce(
+        (sum, a) => sum + a.content.length,
+        0,
+      );
       if (totalBytes > MAX_TOTAL_ATTACHMENT_BYTES) {
         return jsonResult({
           success: false,
@@ -74,9 +82,9 @@ export function registerSendEmail(server: McpServer, smtp: SmtpClient) {
       const confirmation = await requestUserConfirmation(
         server,
         `Send email to "${recipientPreview}"` +
-          `${args.cc ? ` (cc: ${args.cc})` : ""}` +
-          `${args.bcc ? ` (bcc: hidden)` : ""}` +
-          ` - subject: "${args.subject ?? ""}"?`
+          (args.cc ? ` (cc: ${args.cc})` : "") +
+          (args.bcc ? ` (bcc: hidden)` : "") +
+          ` - subject: "${args.subject ?? ""}"?`,
       );
       if (confirmation.status === "declined") {
         return jsonResult(confirmationDeclinedResult());

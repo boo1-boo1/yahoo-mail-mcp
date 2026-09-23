@@ -1,6 +1,10 @@
 import { z } from "zod";
 import type { ImapClient } from "../imap/client.ts";
-import { buildSearchObject, fetchSnippet, toMessageSummary } from "../imap/search.ts";
+import {
+  buildSearchObject,
+  fetchSnippet,
+  toMessageSummary,
+} from "../imap/search.ts";
 import { jsonResult } from "./respond.ts";
 
 const inputShape = {
@@ -42,24 +46,33 @@ export function registerSearchEmails(imap: ImapClient) {
           return { total: 0, messages: [] };
         }
 
-        const fetched = await client.fetchAll(uids, {
-          uid: true,
-          envelope: true,
-          flags: true,
-          bodyStructure: true,
-        }, { uid: true });
+        const fetched = await client.fetchAll(
+          uids,
+          {
+            uid: true,
+            envelope: true,
+            flags: true,
+            bodyStructure: true,
+          },
+          { uid: true },
+        );
 
         fetched.sort(
-          (a, b) => (b.envelope?.date ? new Date(b.envelope.date).getTime() : 0) -
-            (a.envelope?.date ? new Date(a.envelope.date).getTime() : 0)
+          (a, b) =>
+            (b.envelope?.date ? new Date(b.envelope.date).getTime() : 0) -
+            (a.envelope?.date ? new Date(a.envelope.date).getTime() : 0),
         );
         const page = fetched.slice(0, args.limit);
 
         const messages = await Promise.all(
           page.map(async (msg) => {
-            const snippet = await fetchSnippet(client, msg.uid, msg.bodyStructure);
+            const snippet = await fetchSnippet(
+              client,
+              msg.uid,
+              msg.bodyStructure,
+            );
             return toMessageSummary(args.folder, msg, snippet);
-          })
+          }),
         );
 
         return { total: uids.length, messages };

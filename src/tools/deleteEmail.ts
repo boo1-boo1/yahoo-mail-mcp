@@ -31,12 +31,16 @@ export function registerDeleteEmail(imap: ImapClient, server: McpServer) {
         destructiveHint: true,
       },
     },
-    handler: async (args: { folder: string; uid: number; permanent: boolean }) => {
+    handler: async (args: {
+      folder: string;
+      uid: number;
+      permanent: boolean;
+    }) => {
       const confirmation = await requestUserConfirmation(
         server,
         args.permanent
           ? `Permanently delete email uid ${args.uid} from folder "${args.folder}"? This cannot be undone.`
-          : `Delete email uid ${args.uid} from folder "${args.folder}"? It will be moved to Trash.`
+          : `Delete email uid ${args.uid} from folder "${args.folder}"? It will be moved to Trash.`,
       );
       if (confirmation.status === "declined") {
         return jsonResult(confirmationDeclinedResult());
@@ -51,24 +55,34 @@ export function registerDeleteEmail(imap: ImapClient, server: McpServer) {
             if (!client.capabilities.has("UIDPLUS")) {
               console.error(
                 "WARNING: server lacks UIDPLUS - permanent delete expunges ALL " +
-                  "messages already flagged \\Deleted in this mailbox, not just this one."
+                  "messages already flagged \\Deleted in this mailbox, not just this one.",
               );
             }
-            const result = await client.messageDelete(String(args.uid), { uid: true });
-            if (!result) {
-              throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);
-            }
-          } else {
-            const trashPath = await imap.getTrashPath(client);
-            const result = await client.messageMove(String(args.uid), trashPath, {
+            const result = await client.messageDelete(String(args.uid), {
               uid: true,
             });
             if (!result) {
-              throw new Error(`Message not found: uid ${args.uid} in folder ${args.folder}`);
+              throw new Error(
+                `Message not found: uid ${args.uid} in folder ${args.folder}`,
+              );
+            }
+          } else {
+            const trashPath = await imap.getTrashPath(client);
+            const result = await client.messageMove(
+              String(args.uid),
+              trashPath,
+              {
+                uid: true,
+              },
+            );
+            if (!result) {
+              throw new Error(
+                `Message not found: uid ${args.uid} in folder ${args.folder}`,
+              );
             }
           }
         },
-        { retry: false }
+        { retry: false },
       );
       return jsonResult({ success: true });
     },

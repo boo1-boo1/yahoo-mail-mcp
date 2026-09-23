@@ -28,7 +28,7 @@ export function buildSearchObject(criteria: SearchCriteria): SearchObject {
 /** Depth-first search for the first text/plain (falling back to text/html) leaf part. */
 function findTextPart(
   node: MessageStructureObject | undefined,
-  preferHtml = false
+  preferHtml = false,
 ): MessageStructureObject | undefined {
   if (!node) return undefined;
   const type = node.type?.toLowerCase() ?? "";
@@ -56,7 +56,7 @@ function stripHtml(html: string): string {
 export async function fetchSnippet(
   client: ImapFlow,
   uid: number,
-  bodyStructure: MessageStructureObject | undefined
+  bodyStructure: MessageStructureObject | undefined,
 ): Promise<string> {
   let node = findTextPart(bodyStructure, false);
   let isHtml = false;
@@ -64,7 +64,7 @@ export async function fetchSnippet(
     node = findTextPart(bodyStructure, true);
     isHtml = true;
   }
-  if (!node || !node.part) return "";
+  if (!node?.part) return "";
 
   const { content } = await client.download(String(uid), node.part, {
     uid: true,
@@ -95,11 +95,16 @@ export function toMessageSummary(
   folder: string,
   msg: {
     uid: number;
-    envelope?: { from?: { name?: string; address?: string }[]; to?: { name?: string; address?: string }[]; subject?: string; date?: Date };
+    envelope?: {
+      from?: { name?: string; address?: string }[];
+      to?: { name?: string; address?: string }[];
+      subject?: string;
+      date?: Date;
+    };
     flags?: Set<string>;
     bodyStructure?: MessageStructureObject;
   },
-  snippet: string
+  snippet: string,
 ): MessageSummary {
   return {
     uid: msg.uid,

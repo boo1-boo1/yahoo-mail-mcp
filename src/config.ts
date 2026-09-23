@@ -17,7 +17,7 @@ const envSchema = z.object({
     .transform((v) => v !== "false"),
 });
 
-export type Config = {
+export interface Config {
   email: string;
   appPassword: string;
   host: string;
@@ -26,7 +26,7 @@ export type Config = {
   smtpHost: string;
   smtpPort: number;
   smtpTls: boolean;
-};
+}
 
 export function loadConfig(): Config {
   const parsed = envSchema.safeParse(process.env);
@@ -36,7 +36,7 @@ export function loadConfig(): Config {
       console.error(`  ${issue.path.join(".")}: ${issue.message}`);
     }
     console.error(
-      "Set YAHOO_EMAIL and YAHOO_APP_PASSWORD (generate an App Password at Yahoo Account Security)."
+      "Set YAHOO_EMAIL and YAHOO_APP_PASSWORD (generate an App Password at Yahoo Account Security).",
     );
     process.exit(1);
   }
@@ -44,7 +44,7 @@ export function loadConfig(): Config {
   const env = parsed.data;
   if (!env.IMAP_TLS) {
     console.error(
-      "WARNING: IMAP_TLS=false - connecting without TLS. Credentials and mail content will be sent in plaintext."
+      "WARNING: IMAP_TLS=false - connecting without TLS. Credentials and mail content will be sent in plaintext.",
     );
   }
   return {

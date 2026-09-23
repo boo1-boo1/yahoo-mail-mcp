@@ -18,7 +18,7 @@ export function registerGetEmail(imap: ImapClient) {
     },
     handler: async (args: { folder: string; uid: number }) => {
       const detail = await imap.withMailbox(args.folder, (client) =>
-        fetchMessageDetail(client, args.folder, args.uid)
+        fetchMessageDetail(client, args.folder, args.uid),
       );
       return jsonResult(detail);
     },

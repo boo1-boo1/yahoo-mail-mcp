@@ -29,11 +29,9 @@ export class ImapClient {
 
   private async ensureConnected(): Promise<void> {
     if (this.client.usable) return;
-    if (!this.connecting) {
-      this.connecting = this.client.connect().finally(() => {
-        this.connecting = null;
-      });
-    }
+    this.connecting ??= this.client.connect().finally(() => {
+      this.connecting = null;
+    });
     await this.connecting;
   }
 
@@ -45,7 +43,7 @@ export class ImapClient {
    */
   async withClient<T>(
     fn: (client: ImapFlow) => Promise<T>,
-    options: { retry?: boolean } = {}
+    options: { retry?: boolean } = {},
   ): Promise<T> {
     const retry = options.retry ?? true;
     await this.ensureConnected();
@@ -64,7 +62,7 @@ export class ImapClient {
   async withMailbox<T>(
     path: string,
     fn: (client: ImapFlow, lock: MailboxLockObject) => Promise<T>,
-    options: { retry?: boolean } = {}
+    options: { retry?: boolean } = {},
   ): Promise<T> {
     return this.withClient(async (client) => {
       const lock = await client.getMailboxLock(path);
@@ -78,15 +76,15 @@ export class ImapClient {
 
   /** Trash mailbox path, resolved once via LIST and cached for the process lifetime. */
   async getTrashPath(client: ImapFlow): Promise<string> {
-    if (!this.trashPath) {
-      this.trashPath = await resolveTrashPath(client);
-    }
+    this.trashPath ??= await resolveTrashPath(client);
     return this.trashPath;
   }
 
   async shutdown(): Promise<void> {
     if (this.client.usable) {
-      await this.client.logout().catch(() => this.client.close());
+      await this.client.logout().catch(() => {
+        this.client.close();
+      });
     }
   }
 }

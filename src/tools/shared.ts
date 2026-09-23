@@ -15,7 +15,7 @@ export type Confirmation =
  */
 export async function requestUserConfirmation(
   server: McpServer,
-  message: string
+  message: string,
 ): Promise<Confirmation> {
   try {
     const result = await server.server.elicitInput({
@@ -46,7 +46,9 @@ export async function requestUserConfirmation(
 }
 
 export function confirmationUnavailableResult(detail: string) {
-  console.error(`Tool action refused - client has no confirmation support: ${detail}`);
+  console.error(
+    `Tool action refused - client has no confirmation support: ${detail}`,
+  );
   return {
     success: false,
     reason: "confirmation_unavailable",

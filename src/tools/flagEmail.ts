@@ -17,9 +17,13 @@ export function registerFlagEmail(imap: ImapClient) {
       description: `Flag (star) or unflag an email. ${UNTRUSTED_CONTENT_NOTICE}`,
       inputSchema: inputShape,
     },
-    handler: async (args: { folder: string; uid: number; flagged: boolean }) => {
+    handler: async (args: {
+      folder: string;
+      uid: number;
+      flagged: boolean;
+    }) => {
       const flags = await imap.withMailbox(args.folder, (client) =>
-        setFlag(client, args.uid, "\\Flagged", args.flagged)
+        setFlag(client, args.uid, "\\Flagged", args.flagged),
       );
       return jsonResult({ success: true, flags });
     },

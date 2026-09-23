@@ -8,15 +8,20 @@ function formatHeaderValue(value: unknown): string {
   if (value instanceof Date) return value.toISOString();
   if (Array.isArray(value)) return value.map(formatHeaderValue).join(", ");
   if (value && typeof value === "object") {
-    if ("text" in value && typeof (value as { text?: unknown }).text === "string") {
+    if (
+      "text" in value &&
+      typeof (value as { text?: unknown }).text === "string"
+    ) {
       return (value as { text: string }).text;
     }
     if ("value" in value) {
-      return formatHeaderValue((value as { value: unknown }).value);
+      return formatHeaderValue(value.value);
     }
     if ("address" in value) {
       const addr = value as { name?: string; address?: string };
-      return addr.name ? `${addr.name} <${addr.address ?? ""}>` : addr.address ?? "";
+      return addr.name
+        ? `${addr.name} <${addr.address ?? ""}>`
+        : (addr.address ?? "");
     }
   }
   return String(value);
@@ -31,7 +36,7 @@ function sanitizeFilename(name: string): string {
 
 function collectAttachmentParts(
   node: MessageStructureObject | undefined,
-  out: AttachmentInfo[] = []
+  out: AttachmentInfo[] = [],
 ): AttachmentInfo[] {
   if (!node) return out;
   const disposition = node.disposition?.toLowerCase();
@@ -40,7 +45,9 @@ function collectAttachmentParts(
   if (disposition === "attachment" && node.part) {
     out.push({
       partId: node.part,
-      filename: filename ? sanitizeFilename(filename) : `attachment-${node.part}`,
+      filename: filename
+        ? sanitizeFilename(filename)
+        : `attachment-${node.part}`,
       contentType: node.type,
       size: node.size ?? 0,
     });
@@ -54,12 +61,12 @@ function collectAttachmentParts(
 export async function fetchMessageDetail(
   client: ImapFlow,
   folder: string,
-  uid: number
+  uid: number,
 ): Promise<MessageDetail> {
   const fetched = await client.fetchOne(
     String(uid),
     { envelope: true, flags: true, bodyStructure: true, source: true },
-    { uid: true }
+    { uid: true },
   );
   if (!fetched || !fetched.source) {
     throw new Error(`Message not found: uid ${uid} in folder ${folder}`);
@@ -96,7 +103,7 @@ export async function fetchMessageDetail(
 export async function fetchAttachment(
   client: ImapFlow,
   uid: number,
-  partId: string
+  partId: string,
 ): Promise<{ filename: string; contentType: string; contentBase64: string }> {
   const { meta, content } = await client.download(String(uid), partId, {
     uid: true,
@@ -105,7 +112,7 @@ export async function fetchAttachment(
 
   if (meta.expectedSize && meta.expectedSize > MAX_ATTACHMENT_BYTES) {
     throw new Error(
-      `Attachment too large: ${meta.expectedSize} bytes (max ${MAX_ATTACHMENT_BYTES})`
+      `Attachment too large: ${meta.expectedSize} bytes (max ${MAX_ATTACHMENT_BYTES})`,
     );
   }
 
@@ -116,12 +123,16 @@ export async function fetchAttachment(
     total += (chunk as Buffer).length;
   }
   if (total >= MAX_ATTACHMENT_BYTES) {
-    throw new Error(`Attachment too large: exceeds ${MAX_ATTACHMENT_BYTES} byte limit`);
+    throw new Error(
+      `Attachment too large: exceeds ${MAX_ATTACHMENT_BYTES} byte limit`,
+    );
   }
   const buffer = Buffer.concat(chunks);
 
   return {
-    filename: meta.filename ? sanitizeFilename(meta.filename) : `attachment-${partId}`,
+    filename: meta.filename
+      ? sanitizeFilename(meta.filename)
+      : `attachment-${partId}`,
     contentType: meta.contentType ?? "application/octet-stream",
     contentBase64: buffer.toString("base64"),
   };
@@ -132,13 +143,17 @@ export async function setFlag(
   client: ImapFlow,
   uid: number,
   flag: string,
-  on: boolean
+  on: boolean,
 ): Promise<string[]> {
   if (on) {
     await client.messageFlagsAdd(String(uid), [flag], { uid: true });
   } else {
     await client.messageFlagsRemove(String(uid), [flag], { uid: true });
   }
-  const msg = await client.fetchOne(String(uid), { flags: true }, { uid: true });
-  return Array.from((msg && msg.flags) || []);
+  const msg = await client.fetchOne(
+    String(uid),
+    { flags: true },
+    { uid: true },
+  );
+  return typeof msg === "object" && msg.flags ? Array.from(msg.flags) : [];
 }

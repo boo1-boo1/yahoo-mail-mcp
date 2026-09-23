@@ -19,7 +19,7 @@ export function registerMarkRead(imap: ImapClient) {
     },
     handler: async (args: { folder: string; uid: number; read: boolean }) => {
       const flags = await imap.withMailbox(args.folder, (client) =>
-        setFlag(client, args.uid, "\\Seen", args.read)
+        setFlag(client, args.uid, "\\Seen", args.read),
       );
       return jsonResult({ success: true, flags });
     },

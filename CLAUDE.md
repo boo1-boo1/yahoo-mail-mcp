@@ -29,7 +29,7 @@ MCP server (stdio transport) exposing Yahoo Mail as tools, built on `@modelconte
 - `src/types.ts` - shared domain types (`MessageSummary`, `MessageDetail`, `AttachmentInfo`, `FolderNode`).
 - All message operations identify by IMAP UID (stable across sessions), never sequence number.
 - Attachment downloads are capped at `MAX_ATTACHMENT_BYTES` (25 MB, `src/imap/message.ts`) to bound memory use; oversized attachments throw rather than buffering fully.
-- `delete_email` defaults to soft delete (move to Trash); `permanent: true` expunges immediately and is unrecoverable. Without the `UIDPLUS` capability, IMAP `EXPUNGE` removes *all* `\Deleted`-flagged messages in the mailbox, not just the target - `deleteEmail.ts` warns via `console.error` when that capability is absent.
+- `delete_email` defaults to soft delete (move to Trash); `permanent: true` expunges immediately and is unrecoverable. Without the `UIDPLUS` capability, IMAP `EXPUNGE` removes _all_ `\Deleted`-flagged messages in the mailbox, not just the target - `deleteEmail.ts` warns via `console.error` when that capability is absent.
 
 ## Manual verification checklist
 

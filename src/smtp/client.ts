@@ -1,12 +1,12 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import type { Config } from "../config.ts";
 
-export type OutgoingAttachment = {
+export interface OutgoingAttachment {
   filename: string;
   content: Buffer;
-};
+}
 
-export type OutgoingMail = {
+export interface OutgoingMail {
   from: string;
   to: string;
   cc?: string;
@@ -14,7 +14,7 @@ export type OutgoingMail = {
   subject: string;
   text: string;
   attachments?: OutgoingAttachment[];
-};
+}
 
 export class SmtpClient {
   private transporter: Transporter;
@@ -39,7 +39,7 @@ export class SmtpClient {
     return info.messageId;
   }
 
-  async shutdown(): Promise<void> {
+  shutdown(): void {
     this.transporter.close();
   }
 }

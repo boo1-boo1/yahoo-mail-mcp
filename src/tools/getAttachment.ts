@@ -19,7 +19,7 @@ export function registerGetAttachment(imap: ImapClient) {
     },
     handler: async (args: { folder: string; uid: number; partId: string }) => {
       const attachment = await imap.withMailbox(args.folder, (client) =>
-        fetchAttachment(client, args.uid, args.partId)
+        fetchAttachment(client, args.uid, args.partId),
       );
       return jsonResult(attachment);
     },

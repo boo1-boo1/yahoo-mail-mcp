@@ -11,7 +11,11 @@ import { registerMoveEmail } from "./moveEmail.ts";
 import { registerDeleteEmail } from "./deleteEmail.ts";
 import { registerSendEmail } from "./sendEmail.ts";
 
-export function registerAllTools(server: McpServer, imap: ImapClient, smtp: SmtpClient) {
+export function registerAllTools(
+  server: McpServer,
+  imap: ImapClient,
+  smtp: SmtpClient,
+) {
   const definitions = [
     registerListFolders(imap),
     registerSearchEmails(imap),

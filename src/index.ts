@@ -20,13 +20,11 @@ registerAllTools(server, imap, smtp);
 const transport = new StdioServerTransport();
 await server.connect(transport);
 
-process.on("SIGINT", async () => {
-  await imap.shutdown();
-  smtp.shutdown();
-  process.exit(0);
-});
-process.on("SIGTERM", async () => {
-  await imap.shutdown();
-  smtp.shutdown();
-  process.exit(0);
-});
+const shutdown = () => {
+  void imap.shutdown().finally(() => {
+    smtp.shutdown();
+    process.exit(0);
+  });
+};
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
