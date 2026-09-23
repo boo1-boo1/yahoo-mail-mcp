@@ -25,11 +25,13 @@
     "@modelcontextprotocol/sdk": "^1.30.0",
     "imapflow": "^1.0.191",
     "mailparser": "^3.9.2",
+    "nodemailer": "^10.0.10",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/mailparser": "^3.4.5",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.2",
     "typescript": "^5.7.0"
   }
 }

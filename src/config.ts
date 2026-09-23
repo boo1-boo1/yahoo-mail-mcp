@@ -9,6 +9,12 @@ const envSchema = z.object({
     .string()
     .default("true")
     .transform((v) => v !== "false"),
+  SMTP_HOST: z.string().default("smtp.mail.yahoo.com"),
+  SMTP_PORT: z.coerce.number().int().default(465),
+  SMTP_TLS: z
+    .string()
+    .default("true")
+    .transform((v) => v !== "false"),
 });
 
 export type Config = {
@@ -17,6 +23,9 @@ export type Config = {
   host: string;
   port: number;
   tls: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  smtpTls: boolean;
 };
 
 export function loadConfig(): Config {
@@ -44,5 +53,8 @@ export function loadConfig(): Config {
     host: env.IMAP_HOST,
     port: env.IMAP_PORT,
     tls: env.IMAP_TLS,
+    smtpHost: env.SMTP_HOST,
+    smtpPort: env.SMTP_PORT,
+    smtpTls: env.SMTP_TLS,
   };
 }
